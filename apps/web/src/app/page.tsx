@@ -1,50 +1,80 @@
-import Link from "next/link";
+"use client"
+
+import { useState } from "react";
+import { useActiveAccount } from "thirdweb/react";
 import { Button } from "@/components/ui/button";
-import { Zap } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { NFTCollection } from "@/components/nft-collection";
+import { LazyMinter } from "@/components/lazy-minter";
 
 export default function Home() {
+  const account = useActiveAccount();
+  const [contractAddress, setContractAddress] = useState("");
+  const [showCollection, setShowCollection] = useState(false);
+
+  const handleViewCollection = () => {
+    if (contractAddress) {
+      setShowCollection(true);
+    } else {
+      alert("Please enter a contract address");
+    }
+  };
+
   return (
-<main className="flex-1">
-  {/* Hero Section */}
-  <section className="relative py-20 lg:py-32">
-    <div className="container px-4 mx-auto max-w-7xl">
-      <div className="text-center max-w-4xl mx-auto">
-        {/* Badge */}
-        <div
-          className="inline-flex items-center gap-2 px-3 py-1 mb-8 text-sm font-medium bg-primary/10 text-primary rounded-full border border-primary/20"
-        >
-          <Zap className="h-4 w-4" />
-          Built on Celo
+    <main className="flex-1">
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold mb-4">
+            Welcome to{" "}
+            {account ? (
+              <span className="text-primary">{account.address}</span>
+            ) : (
+              <span className="text-primary">ThirdwebNft</span>
+            )}
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            View and mint NFTs on Celo Sepolia Testnet
+          </p>
         </div>
 
-        {/* Main Heading */}
-        <h1
-          className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
-        >
-          Welcome to{" "}
-          <span className="text-primary">CeloNFTs</span>
-        </h1>
+        {account ? (
+          <div className="space-y-8">
+            {/* Contract Address Input */}
+            <Card className="max-w-2xl mx-auto">
+              <CardHeader>
+                <CardTitle>Enter NFT Contract Address</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <input
+                  type="text"
+                  value={contractAddress}
+                  onChange={(e) => setContractAddress(e.target.value)}
+                  className="w-full p-3 border rounded-md"
+                  placeholder="0x..."
+                />
+                <Button onClick={handleViewCollection} className="w-full">
+                  View Collection
+                </Button>
+              </CardContent>
+            </Card>
 
-        {/* Subtitle */}
-        <p
-          className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed"
-        >
-          Start building your decentralized application on Celo. Fast and secure blockchain for everyone.
-        </p>
+            {/* NFT Collection and Minter */}
+            {showCollection && contractAddress && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <LazyMinter contractAddress={contractAddress} />
+                </div>
+                <NFTCollection contractAddress={contractAddress} />
+              </>
+            )}
 
-
-        {/* CTA Buttons */}
-        <div
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16"
-        >
-          <Button size="lg" className="px-8 py-3 text-base font-medium">
-            Get Started
-          </Button>
-        </div>
+          </div>
+        ) : (
+          <div className="text-center">
+            <p className="text-lg mb-4">Please connect your wallet to continue</p>
+          </div>
+        )}
       </div>
-    </div>
-  </section>
-
-</main>
+    </main>
   );
 }
